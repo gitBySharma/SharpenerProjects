@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Expense Tracker</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container-sm col">
+        <form id='expenseForm'>
+            <div>
+                <label for="expenseAmount"> Choose expense amount: </label>
+                <input id="expenseAmount" type="number" class="form-control bg-lightblue" required>
+            </div>
+            <br>
+            <div>
+                <label for="chooseCategory"> Choose a Category: </label>
+                <select class="chooseCategory form-select">
+                    <option value="movie">Movie</option>
+                    <option value="cafe">Cafe</option>
+                    <option value="drive">Drive</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="date">Date</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="picnic">Picnic</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <label for="expenseDescription"> Give Description: </label>
+                <input id="expenseDescription" type="text" class="form-control bg-lightblue" required>
+            </div>
+            <br>
+            <button type="submit" id="submit" class="btn btn-outline-success btn-sm"> Add Expense</button>
+        </form>
+
+        <ul class="list">
+
+        </ul>
+    </div>
+
+    <script>
+        const submitButton = document.getElementById("expenseForm");
+        const listToShow = document.querySelector('.list');
+
+        //handling the add expense event and functionality to add expense
+        submitButton.addEventListener("submit", function (event) {
+            event.preventDefault();
+            const newDetails = document.createElement("li");
+
+            //adding the entered details to an unordered list and displaying it on DOM
+            const expense = document.getElementById('expenseAmount');
+            let amount = document.createElement('span');
+            amount.innerText = expense.value;
+            newDetails.appendChild(amount);
+            newDetails.appendChild(document.createTextNode(" - "));
+
+            const category = document.querySelector('.chooseCategory');
+            let categoryValue = document.createElement('span');
+            categoryValue.innerText = category.value;
+            newDetails.appendChild(categoryValue);
+            newDetails.appendChild(document.createTextNode(" - "));
+
+            const description = document.getElementById('expenseDescription');
+            let descriptionValue = document.createElement('span');
+            descriptionValue.innerText = description.value;
+            newDetails.appendChild(descriptionValue);
+            newDetails.appendChild(document.createTextNode("   "));
+            listToShow.appendChild(newDetails);
+
+
+            //creating two buttons and appending them on the list and displaying on DOM
+            const deleteBtn = document.createElement('button');
+            const editBtn = document.createElement('button');
+            deleteBtn.appendChild(document.createTextNode("Delete Expense"));
+            editBtn.appendChild(document.createTextNode("Edit Expense"));
+            newDetails.appendChild(deleteBtn);
+            newDetails.appendChild(document.createTextNode("   "));
+            newDetails.appendChild(editBtn);
+            deleteBtn.setAttribute('class', "delete_btn btn btn-outline-danger btn-sm");
+            editBtn.setAttribute('class', "edit_btn btn btn-outline-info btn-sm");
+            listToShow.appendChild(newDetails);
+
+
+            //adding the entries to local storage
+            const storeData = {
+                amountOfExpense: expense.value,
+                typeOfExpense: category.value,
+                descriptionOfExpense: description.value
+            }
+            localStorage.setItem(storeData.descriptionOfExpense, JSON.stringify(storeData));
+
+        });
+
+        //handling the delete event
+        listToShow.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (event.target.classList.contains('delete_btn')) {
+                deleteExpense(event.target);
+            }
+        });
+
+        //handling the edit event
+        listToShow.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (event.target.classList.contains('edit_btn')) {
+                editExpense(event.target);
+            }
+        })
+
+        //function to delete data from DOM and local storage
+        function deleteExpense(descriptionOfExpense) {
+            const toBeRemoved = descriptionOfExpense.previousElementSibling.innerText;
+            listToShow.removeChild(descriptionOfExpense.closest('li'));
+            localStorage.removeItem(toBeRemoved);
+        }
+
+        //function to edit data whenever any wrong entry is entered
+        function editExpense(editData) {
+            const listItem = editData.closest('li');
+            const spans = listItem.querySelectorAll('span');
+            document.getElementById('expenseAmount').value = spans[0].innerText;
+            document.querySelector('.chooseCategory').value = spans[1].innerText;
+            document.getElementById('expenseDescription').value = spans[2].innerText;
+
+            deleteExpense(editData);
+            localStorage.removeItem(spans[2].innerText); //spans[2].innerText = value of expenseDescription, key of the object in local storage
+        }
+
+        // //creating the edit functionality
+        // listToShow.addEventListener("click", function(event){
+        //     event.preventDefault();
+        //     const editButton = event.target;
+        //     if (editButton.classList.contains('edit_btn')) {
+        //         const listItem = editButton.closest('li');
+        //         const spans = listItem.querySelectorAll('span');
+
+        //         // Extracting values from spans
+        //         const amount = spans[0].innerText;
+        //         const category = spans[1].innerText;
+        //         const description = spans[2].innerText;
+
+        //         // Repopulating input fields
+        //         document.getElementById('expenseAmount').value = amount;
+        //         document.querySelector('.chooseCategory').value = category;
+        //         document.getElementById('expenseDescription').value = description;
+
+        //         // Removing the list item from the DOM and local storage
+        //         listToShow.removeChild(listItem);
+        //         const descriptionOfExpense = description;
+        //         localStorage.removeItem(descriptionOfExpense);
+        //     }
+        // });
+    </script>
+</body>
+
+</html>
